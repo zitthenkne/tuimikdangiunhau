@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trò chơi Tình Yêu: Cáo Đuổi Sóc - Game Over Gọn Gàng, Hạt Dẻ Siêu Bự!</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap'); */
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #ffc0cb, #ffafcc, #ff87b7, #ff69b4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #fff;
+            overflow-x: hidden;
+            padding: 10px;
+        }
+
+        .game-wrapper {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .game-container {
+            background-color: rgba(255, 255, 255, 0.97);
+            padding: 25px;
+            border-radius: 35px;
+            border: 4px solid #FF1493;
+            box-shadow: 0 0 25px rgba(255,20,147,0.6),
+                        0 12px 35px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 95%;
+            max-width: 900px;
+            position: relative;
+        }
+
+        #mode-selection-screen, #map-selection-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            color: #C2185B;
+        }
+        #mode-selection-screen h2, #map-selection-screen h2 {
+            font-family: 'Pacifico', cursive;
+            font-size: clamp(2rem, 5.5vw, 2.8rem);
+            margin-bottom: 30px;
+            color: #E91E63;
+            text-shadow: 2px 2px 3px rgba(0,0,0,0.15);
+        }
+        .mode-button, .map-button {
+            background: linear-gradient(145deg, #ff89e0, #e91e63);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 15px 30px;
+            font-size: clamp(1.1rem, 3.2vw, 1.3rem);
+            font-weight: bold;
+            margin: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 220px;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.2), inset 0 -2px 3px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .mode-button .button-icon, .map-button .button-icon {
+            margin-right: 10px;
+            font-size: 1.3em;
+        }
+
+        .mode-button:hover, .map-button:hover {
+            background: linear-gradient(145deg, #ff99e6, #f03273);
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 7px 18px rgba(0,0,0,0.25), inset 0 -2px 3px rgba(0,0,0,0.1);
+        }
+        .mode-description {
+            font-size: 0.95rem;
+            color: #AD1457;
+            margin-top: -8px;
+            margin-bottom: 18px;
+            max-width: 280px;
+        }
+
+        .game-layout {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 15px;
+        }
+
+        canvas {
+            border: 5px solid #ff89c0;
+            border-radius: 20px;
+            background-color: #FFF5FA;
+            display: block;
+        }
+        canvas.walled-mode {
+            border: 10px solid #c2185b;
+        }
+
+        .title { font-family: 'Pacifico', cursive; font-size: clamp(2.5rem, 7vw, 3.5rem); color: #E91E63; text-shadow: 3px 3px 0px #fff, 5px 5px 0px rgba(255,20,147,0.5); margin-bottom: 15px; animation: titleShine 3s infinite alternate; }
+        @keyframes titleShine { 0% {text-shadow: 3px 3px 0px #fff, 5px 5px 0px rgba(255,20,147,0.3);} 100% {text-shadow: 3px 3px 0px #fff, 7px 7px 15px rgba(255,20,147,0.7), -2px -2px 5px #ffd1dc;} }
+        @keyframes gentleBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+        .heart-icon { display: inline-block; animation: pulse 1s infinite, gentleBob 2s infinite ease-in-out; color: #FF1493; }
+
+
+        .game-info { display: flex; justify-content: space-around; margin-bottom: 15px; width: 100%; max-width: 400px; margin-left:auto; margin-right:auto;}
+        .score-board, .big-squirrel-timer-display { background-color: rgba(255, 255, 255, 0.85); color: #E91E63; padding: 8px 15px; border-radius: 15px; font-weight: bold; font-size: clamp(0.9rem, 2.5vw, 1.1rem); box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: 2.5px solid #f06292;}
+        
+        /* MODIFIED CSS FOR GAME OVER UI - START */
+        #overlay-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: transparent; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 10px; /* Reduced padding of overlay */
+            box-sizing: border-box;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+         #overlay-container.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        #gameOverMessage {
+            font-family: 'Pacifico', cursive;
+            color: #ffffff;
+            font-size: clamp(1.4rem, 3.5vw, 1.8rem); /* Made smaller */
+            text-shadow: 2px 2px 3px rgba(0,0,0,0.7); /* Adjusted shadow */
+            text-align: center;
+            margin-bottom: 8px; /* Reduced margin */
+            max-width: 85%;     /* Limit width */
+            line-height: 1.3;   /* Adjust line height if needed */
+        }
+
+        #overlay-container #restartButton, 
+        #overlay-container #changeModeButton {
+            color: white;
+            border: none;
+            border-radius: 25px; /* Adjusted border-radius */
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.35);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.18), inset 0 -1.5px 3px rgba(0,0,0,0.1); /* Adjusted shadow */
+            display: flex; 
+            align-items: center;
+            justify-content: center;
+        }
+         #overlay-container #restartButton:hover, 
+         #overlay-container #changeModeButton:hover {
+            transform: translateY(-2px) scale(1.02); 
+            box-shadow: 0 5px 13px rgba(0,0,0,0.22), inset 0 -1.5px 3px rgba(0,0,0,0.1);/* Adjusted hover shadow */
+        }
+
+        #overlay-container #restartButton {
+            background: linear-gradient(145deg, #ff79da, #ff1493);
+            padding: 8px 18px;  /* Further reduced padding */
+            font-size: 0.85rem; /* Further reduced font size */
+            font-weight: bold;
+            margin-top: 10px;   /* Adjusted margin */
+            border: 1.5px solid white; 
+        }
+         #overlay-container #restartButton:hover {
+            background: linear-gradient(145deg, #ff89e0, #ff2fa9);
+        }
+
+        #overlay-container #changeModeButton {
+            background: #5c6bc0; 
+            margin-top: 7px;    
+            padding: 7px 16px; 
+            font-size: 0.75rem;
+            border: 1.5px solid #e8eaf6; 
+        }
+        #overlay-container #changeModeButton:hover {
+            background: #7986cb;
+        }
+
+        .button-icon-overlay { 
+            margin-left: 6px; 
+            font-size: 0.95em; 
+        }
+        /* MODIFIED CSS FOR GAME OVER UI - END */
+
+        .instructions {
+            max-width: 95%;
+            color: #AD1457;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+        .footer-text { font-size: 0.9em; margin-top: 20px; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
+        #touch-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 220px;
+        }
+        .touch-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: clamp(180px, 100%, 220px);
+        }
+
+        .touch-button {
+            background: linear-gradient(145deg, #ff91a4, #ff69b4);
+            color: white;
+            border: 2px solid #fff0f5;
+            border-radius: 50%;
+            width: clamp(60px, 14vw, 70px);
+            height: clamp(60px, 14vw, 70px);
+            font-size: clamp(2rem, 5vw, 2.5rem);
+            display: flex; align-items: center; justify-content: center;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+         .touch-button:active { transform: scale(0.95); background: linear-gradient(145deg, #ff7fa0, #ff5aa0); }
+
+        @media (max-width: 850px) {
+            .game-layout { flex-direction: column; align-items: center; gap: 20px; }
+            #touch-controls { margin-left: 0; margin-top: 20px; min-width: auto; }
+            .game-container { max-width: 600px; }
+        }
+        @media (max-width: 480px) {
+            .game-container { padding: 20px; }
+            .mode-button, .map-button { min-width: 180px; padding: 12px 20px; }
+            .touch-grid { width: clamp(160px, 50vw, 180px); gap: 10px;}
+            .touch-button { width: clamp(50px, 13vw, 60px); height: clamp(50px, 13vw, 60px); font-size: clamp(1.6rem, 4.5vw, 2rem); }
+            .title { font-size: clamp(2rem, 6vw, 2.8rem); }
+            .game-info { flex-direction: column; gap: 8px; align-items: center; }
+            #gameOverMessage { font-size: clamp(1.2rem, 3.2vw, 1.6rem); } /* Even smaller on tiny screens */
+            #overlay-container #restartButton { padding: 7px 15px; font-size: 0.75rem; }
+            #overlay-container #changeModeButton { padding: 6px 12px; font-size: 0.7rem; }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="game-wrapper">
+        <div class="game-container">
+            <div id="mode-selection-screen">
+                <h2>Chọn Chế Độ Chơi <span class="heart-icon">💖</span></h2>
+                <button class="mode-button" data-mode="1"><span class="button-icon">✨</span>Không Ràng Buộc</button>
+                <p class="mode-description">Cáo đi xuyên qua các cạnh của khung chơi!</p>
+                <button class="mode-button" data-mode="2"><span class="button-icon">🧱</span>Đóng Hộp</button>
+                <p class="mode-description">Cẩn thận! Chạm vào tường là thua đó nha!</p>
+                <button class="mode-button" data-mode="3"><span class="button-icon">🌲</span>Chướng Ngại Vật</button>
+                <p class="mode-description">Thử thách bản thân với các vật cản "khó nhằn" hơn!</p>
+            </div>
+
+            <div id="map-selection-screen" style="display: none;">
+                <h2>Chọn Bản Đồ <span class="heart-icon">🗺️</span></h2>
+                <button class="map-button" data-map="1"><span class="button-icon">1️⃣</span>Bản Đồ Thử Thách</button>
+                <button class="map-button" data-map="2"><span class="button-icon">2️⃣</span>Bản Đồ Gian Nan</button>
+                <button class="map-button" data-map="3"><span class="button-icon">3️⃣</span>Bản Đồ Siêu Khó</button>
+                <button class="map-button" id="back-to-modes" style="background: linear-gradient(145deg, #bdc3c7, #95a5a6); margin-top: 20px;"><span class="button-icon">↩️</span>Quay Lại</button>
+            </div>
+
+            <div id="game-content" style="display: none;">
+                <h1 class="title">Cáo <span class="heart-icon">💖</span> Sóc</h1>
+                <div class="game-info">
+                    <div class="score-board">Điểm Yêu Thương: <span id="score">0</span></div>
+                    <div class="big-squirrel-timer-display">Sóc To: <span id="big-squirrel-countdown">--</span>s</div>
+                </div>
+                <div class="game-layout">
+                    <div class="canvas-area">
+                        <div id="canvas-wrapper">
+                            <canvas id="gameCanvas" width="400" height="400"></canvas>
+                            <div id="overlay-container">
+                                <div id="gameOverMessage"></div>
+                                <button id="restartButton">Chơi Lại Nè! <span class="button-icon-overlay">🔄</span></button>
+                                <button id="changeModeButton">Đổi Chế Độ <span class="button-icon-overlay">📋</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="touch-controls">
+                        <div class="touch-grid">
+                            <div class="empty"></div><button class="touch-button" id="upButton">⬆️</button><div class="empty"></div>
+                            <button class="touch-button" id="leftButton">⬅️</button><div class="empty"></div><button class="touch-button" id="rightButton">➡️</button>
+                            <div class="empty"></div><button class="touch-button" id="downButton">⬇️</button><div class="empty"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="instructions">
+                    <p>Dùng các phím mũi tên (hoặc chạm) để Cáo di chuyển.</p>
+                    <p>Giúp Cáo "tìm" Sóc để tăng điểm yêu thương!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p class="footer-text">Dành tặng tình yêu to bự của tớ <span class="heart-icon">💖</span></p>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('score');
+        const overlayContainer = document.getElementById('overlay-container');
+        const gameOverMessageElement = document.getElementById('gameOverMessage');
+        const restartButton = overlayContainer.querySelector('#restartButton');
+        const changeModeButton = overlayContainer.querySelector('#changeModeButton');
+
+        const modeSelectionScreen = document.getElementById('mode-selection-screen');
+        const mapSelectionScreen = document.getElementById('map-selection-screen');
+        const gameContent = document.getElementById('game-content');
+        
+        const bigSquirrelCountdownDisplay = document.getElementById('big-squirrel-countdown');
+
+        const gridSize = 20;
+        let tileCount = 20; 
+
+        let fox = [{ x: 10, y: 10 }];
+        let foxHeadEmoji = '🦊';
+        let foxBodyEmoji = '💖';
+
+        let squirrel = { x: 15, y: 15 };
+        let squirrelEmoji = '🐿️';
+        
+        let bigSquirrel = { x: -1, y: -1, active: false, emoji: '🌰' }; 
+        let bigSquirrelSpawnInterval = 15000;
+        let bigSquirrelActiveDuration = 10000;
+        let bigSquirrelSpawnTimer;
+        let bigSquirrelActiveTimer;
+        let bigSquirrelCountdown = bigSquirrelSpawnInterval / 1000;
+
+        let dx = 0;
+        let dy = 0;
+        let score = 0;
+        let gameSpeed = 250; 
+        let gameInterval;
+        let countdownInterval;
+        let changingDirection = false;
+        let isGameOver = false;
+        let currentMode = 0;
+        let currentMap = 0;
+
+        const obstacleAddInterval = 45000; 
+        let obstacleAddTimerId;
+        const numberOfNewObstaclesToAdd = 4; 
+
+        const obstacles = { /* Obstacle data from previous correct version */
+            map1: [ {x:5,y:5},{x:5,y:6},{x:5,y:7}, {x:6,y:5}, {x:7,y:5}, {x:14,y:14},{x:14,y:13},{x:14,y:12}, {x:13,y:14}, {x:12,y:14}, {x:2,y:15},{x:3,y:15},{x:4,y:15}, {x:17,y:4},{x:16,y:4},{x:15,y:4}, {x:10,y:2}, {x:10,y:17}, {x:2,y:9}, {x:17,y:10} ],
+            map2: [ {x:0,y:5},{x:0,y:6},{x:0,y:7},{x:0,y:8},{x:0,y:9},{x:0,y:10}, {x:19,y:5},{x:19,y:6},{x:19,y:7},{x:19,y:8},{x:19,y:9},{x:19,y:10}, {x:5,y:0},{x:6,y:0},{x:7,y:0},{x:8,y:0},{x:9,y:0},{x:10,y:0}, {x:12,y:19},{x:13,y:19},{x:14,y:19},{x:15,y:19},{x:16,y:19},{x:17,y:19}, {x:5,y:5},{x:6,y:5},{x:5,y:6}, {x:14,y:14},{x:13,y:14},{x:14,y:13}, {x:8,y:10},{x:9,y:10},{x:10,y:10},{x:11,y:10}, {x:10,y:9} ],
+            map3: [ {x:0,y:0},{x:1,y:0},{x:2,y:0},{x:3,y:0},{x:4,y:0},{x:5,y:0}, {x:0,y:1},{x:0,y:2},{x:0,y:3},{x:0,y:4},{x:0,y:5}, {x:19,y:19},{x:18,y:19},{x:17,y:19},{x:16,y:19},{x:15,y:19},{x:14,y:19}, {x:19,y:18},{x:19,y:17},{x:19,y:16},{x:19,y:15},{x:19,y:14}, {x:8,y:8},{x:8,y:9},{x:8,y:10},{x:8,y:11}, {x:9,y:8},{x:10,y:8},{x:11,y:8}, {x:11,y:9},{x:11,y:10},{x:11,y:11}, {x:9,y:11},{x:10,y:11}, {x:3,y:10},{x:4,y:10},{x:5,y:10},{x:6,y:10}, {x:13,y:10},{x:14,y:10},{x:15,y:10},{x:16,y:10}, {x:10,y:3},{x:10,y:4},{x:10,y:5},{x:10,y:6}, {x:10,y:13},{x:10,y:14},{x:10,y:15},{x:10,y:16}, {x:1,y:15}, {x:18,y:3}, {x:5,y:17}, {x:14,y:2} ]
+        };
+        let currentObstacles = [];
+        const obstacleEmoji = '🌲';
+
+        const upButton = document.getElementById('upButton');
+        const downButton = document.getElementById('downButton');
+        const leftButton = document.getElementById('leftButton');
+        const rightButton = document.getElementById('rightButton');
+
+        function showModeSelection() { /* Unchanged */ }
+        function showMapSelection() { /* Unchanged */ }
+        function startGameWithMode(mode, map = 0) { /* Unchanged */ }
+        
+        function initializeEventListeners() {
+            const modeButtons = document.querySelectorAll('.mode-button');
+            if (modeButtons.length > 0) {
+                modeButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const mode = parseInt(button.dataset.mode);
+                        if (mode === 3) { showMapSelection(); } else { startGameWithMode(mode); }
+                    });
+                });
+            } else { console.error('[Cáo Đuổi Sóc Game] Không tìm thấy .mode-button'); }
+
+            const mapButtons = document.querySelectorAll('.map-button');
+            if (mapButtons.length > 0) {
+                mapButtons.forEach(button => {
+                    if (button.id === 'back-to-modes') {
+                        button.addEventListener('click', showModeSelection);
+                    } else {
+                        button.addEventListener('click', () => {
+                            const map = parseInt(button.dataset.map);
+                            startGameWithMode(3, map);
+                        });
+                    }
+                });
+            } else { console.error('[Cáo Đuổi Sóc Game] Không tìm thấy .map-button'); }
+            
+            if (changeModeButton) changeModeButton.addEventListener('click', showModeSelection);
+            else console.error("[Cáo Đuổi Sóc Game] Không tìm thấy 'changeModeButton'!");
+            
+            if (restartButton) restartButton.addEventListener("click", resetGame);
+            else console.error("[Cáo Đuổi Sóc Game] Không tìm thấy 'restartButton'!");
+
+            if (upButton && downButton && leftButton && rightButton) {
+                upButton.addEventListener('click', () => { if(!isGameOver) handleTouchControls('up'); });
+                downButton.addEventListener('click', () => { if(!isGameOver) handleTouchControls('down'); });
+                leftButton.addEventListener('click', () => { if(!isGameOver) handleTouchControls('left'); });
+                rightButton.addEventListener('click', () => { if(!isGameOver) handleTouchControls('right'); });
+            } else { console.error("[Cáo Đuổi Sóc Game] Không tìm thấy nút điều khiển chạm!"); }
+
+            document.addEventListener("keydown", (e) => { 
+                if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key) && gameContent.style.display === 'block' && !isGameOver) {
+                    e.preventDefault();
+                }
+                if (!isGameOver) { changeDirection(e); }
+            });
+            window.addEventListener('resize', resizeCanvas);
+        }
+        
+        // MODIFIED: drawEmoji to make 2x2 squirrel visually larger
+        function drawEmoji(emoji, x, y, size, color = null) {
+            if (color) ctx.fillStyle = color;
+
+            let fontSize;
+            let yOffset;
+
+            if (size === (2 * gridSize)) { // For the 2x2 Big Squirrel
+                fontSize = size * 0.92; // Try to make the emoji fill more of the 2x2 area
+                yOffset = size * 0.07;  // Adjust y-offset for better vertical centering of large emoji
+            } else if (size === gridSize * 0.9) { // For fox body segments
+                fontSize = size * 0.98; 
+                yOffset = size * 0.05;
+            } else { // For regular 1x1 cell emojis (fox head, normal squirrel, obstacles)
+                fontSize = size * 0.95;
+                yOffset = size * 0.05;
+            }
+            
+            ctx.font = `${fontSize}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(emoji, x + size / 2, y + size / 2 + yOffset);
+        }
+
+        function drawFox() { /* Unchanged */ }
+        function drawSquirrel() { /* Unchanged */ }
+        function drawBigSquirrel() { /* Unchanged, still calls drawEmoji with 2*gridSize */ }
+        function drawObstacles() { /* Unchanged */ }
+        function clearCanvas(isGameOverScreen = false) { /* Unchanged */ }
+        function moveFox() { /* Unchanged */ }
+        function generateValidPosition() { /* Unchanged */ }
+        function generateSquirrel() { /* Unchanged */ }
+        function spawnBigSquirrel() { /* Unchanged */ }
+        function deactivateBigSquirrel() { /* Unchanged */ }
+        function resetBigSquirrelSpawnTimer(eaten = false) { /* Unchanged */ }
+        function addRandomObstacles() { /* Unchanged, uses new constants */ }
+        function checkCollision() { /* Unchanged */ }
+        function handleGameOver() {  /* Unchanged */ }
+        function resetGame() { /* Unchanged, ensures obstacles are handled */ }
+        function gameLoop() { /* Unchanged */ }
+        function initialGameStart() { /* Unchanged */ }
+        function changeDirection(event) { /* Unchanged */ }
+        function handleTouchControls(direction) { /* Unchanged */ }
+        function startGameInterval() { /* Unchanged */ }
+        function startGameDrawing() { /* Unchanged */ }
+        function resizeCanvas() { /* Unchanged */ }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeEventListeners(); // Central place to init listeners
+            showModeSelection(); 
+            resizeCanvas(); 
+        });
+    </script>
+</body>
+</html>
